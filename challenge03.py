@@ -1,20 +1,19 @@
 #4.5 hrs
 
 def main(ciphertext):
+    return decrypt(ciphertext)
+
+def decrypt(ciphertext):
     allPlaintexts = getAllPlaintexts(ciphertext)
-    listOfFrequencyDicts = [getFrequencyDict(plaintext) for plaintext in allPlaintexts]
-    listOfScores = [scoreFrequencyDict(freqDict) for freqDict in listOfFrequencyDicts]
-    bestGuessIndex = listOfScores.index(max(listOfScores))
-    bestGuess = allPlaintexts[bestGuessIndex]
-    #convert bestGuess to printable ascii characters
-    return bytes.fromhex(bestGuess[2:])
+    return pickPlaintext(allPlaintexts)
+    
 
 #generate a list of all possible plaintexts, still in hex
 def getAllPlaintexts(ciphertext):
     result = []
     #just generating a list of all the possible bytes:
     digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
-    keyBytes = [a + b for b in digits for a in digits]
+    keyBytes = [a + b for a in digits for b in digits]
     #how many times you have to repeat each key char to make it the length of ciphertext
     length = int(len(ciphertext)/2)
     allKeys = [byte*length for byte in keyBytes]
@@ -27,6 +26,15 @@ def getAllPlaintexts(ciphertext):
 def fixed_XOR(hexstr1, hexstr2):
     return hex(int(hexstr1, 16) ^ int(hexstr2, 16))
     
+#given a list of plaintexts in hex, return the most likely one in printable bytes
+def pickPlaintext(allPlaintexts):
+    listOfFrequencyDicts = [getFrequencyDict(plaintext) for plaintext in allPlaintexts]
+    listOfScores = [scoreFrequencyDict(freqDict) for freqDict in listOfFrequencyDicts]
+    bestGuessIndex = listOfScores.index(max(listOfScores))
+    bestGuess = allPlaintexts[bestGuessIndex]
+    #convert bestGuess to printable bytes
+    return bytes.fromhex(bestGuess[2:])
+
     
 #returns frequency dict of each byte in plaintext, converted to decimal
 def getFrequencyDict(plaintext):
@@ -47,22 +55,20 @@ def getFrequencyDict(plaintext):
     
 def scoreFrequencyDict(frequencyDict):
     score = 0
-    
     #discard dict if it has nonprintable chars:
     keys = frequencyDict.keys()
     for i in range(31):
         if i in keys:
             return -1000
     #more nonprintable char checking:
-    for i in range(128, 255):
+    for i in range(127, 255):
         if i in keys:
             return -1000
             
-    
     inverse = [(value, key) for key, value in frequencyDict.items()]
     sorted_by_value = sorted(inverse, key=lambda tup: tup[0])
     #can play around with the indices we use from sorted_by_value
-    mostCommon = [elt[1] for elt in sorted_by_value[-6:-1]]
+    mostCommon = [elt[1] for elt in sorted_by_value[-8:]]
     #if it's an E or e
     if 69 in mostCommon or 101 in mostCommon:
         score += 13
@@ -127,3 +133,4 @@ def scoreFrequencyDict(frequencyDict):
     if 90 in mostCommon or 122 in mostCommon:
         score -= 13
     return score
+    
