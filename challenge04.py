@@ -7,6 +7,7 @@ def main(filename):
     print(listOfCiphertexts)
     listOfPlaintexts = [decrypt(ciphertext) for ciphertext in listOfCiphertexts]
     print(listOfPlaintexts)
+    print('in challenge 4')
     return pickPlaintext(listOfPlaintexts)
     
 #given a filename, parses and on each newline adds the string to a list
