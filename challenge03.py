@@ -5,10 +5,12 @@ def main(ciphertext):
 
 def decrypt(ciphertext):
     allPlaintexts = getAllPlaintexts(ciphertext)
-    return pickPlaintext(allPlaintexts)
+    bestPlaintext = pickPlaintext(allPlaintexts)
+    print('decrypt: ' + str(type(bestPlaintext)))
+    return bestPlaintext
     
 
-#generate a list of all possible plaintexts, still in hex
+#generate a list of all possible plaintexts, still in bytes
 def getAllPlaintexts(ciphertext):
     result = []
     #just generating a list of all the possible bytes:
@@ -18,41 +20,51 @@ def getAllPlaintexts(ciphertext):
     length = int(len(ciphertext)/2)
     allKeys = [byte*length for byte in keyBytes]
     for key in allKeys:
-        hexXOR = fixed_XOR(ciphertext, key)
-        result.append(hexXOR)
+        bytesXOR = fixed_XOR(ciphertext, key)
+        result.append(bytesXOR)
+    print('getAllPlaintexts: ' + str(type(result)))
     return result
 
-#from challenge2
+#edited!! different from the one in challenge2
 def fixed_XOR(hexstr1, hexstr2):
-    return hex(int(hexstr1, 16) ^ int(hexstr2, 16))
+    intXOR = int(hexstr1, 16) ^ int(hexstr2, 16)
+    hexXOR = hex(intXOR)
+    try:
+        return bytes.fromhex(hexXOR[2:])
+    except ValueError or TypeError:
+        print('value error in fixedXOR')
+        return bytes.fromhex(hexXOR[2:] + '0')
     
-#given a list of plaintexts in hex, return the most likely one in printable bytes
+#given a list of plaintexts in bytes, return the most likely one still in bytes
 def pickPlaintext(allPlaintexts):
     listOfFrequencyDicts = [getFrequencyDict(plaintext) for plaintext in allPlaintexts]
     listOfScores = [scoreFrequencyDict(freqDict) for freqDict in listOfFrequencyDicts]
     bestGuessIndex = listOfScores.index(max(listOfScores))
     bestGuess = allPlaintexts[bestGuessIndex]
     #convert bestGuess to printable bytes
-    return bytes.fromhex(bestGuess[2:])
+    print('pickPlaintext: ' + str(type(bestGuess)))
+    return bestGuess
 
     
 #returns frequency dict of each byte in plaintext, converted to decimal
+#tbh not sure where the conversion happens, but key values end up in decimal
 def getFrequencyDict(plaintext):
-    plaintext = plaintext[2:]
     result = {}
     #this makes a list of bytes in DECIMAL
     try:
-        listOfBytes = list(bytes.fromhex(plaintext))
+        listOfBytes = list(plaintext)
     except ValueError:
         #sometimes it shaves off the last 0 of plaintext, and then this throws an error
-        listOfBytes = list(bytes.fromhex(plaintext + '0'))
+        listOfBytes = list(plaintext + '0')
     for byte in listOfBytes:
         if byte not in result.keys():
             result[byte] = 1
         else:
             result[byte] +=1
+    print('getFrequencyDict' + str(type(result)))
     return result
     
+
 def scoreFrequencyDict(frequencyDict):
     score = 0
     #discard dict if it has nonprintable chars:
@@ -132,5 +144,6 @@ def scoreFrequencyDict(frequencyDict):
     #if it's Z or z
     if 90 in mostCommon or 122 in mostCommon:
         score -= 13
+    print('scoreFrequencyDict' + str(type(score)))
     return score
     
