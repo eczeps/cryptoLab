@@ -1,16 +1,18 @@
 #2 hrs
+#NOTE: MAKE SURE THAT YOU'VE SYNCED DIRECTORY TO THE EDITOR (BOTTOM RIGHT IN CANOPY)
 
 from challenge03 import *
 
 def main(filename):
     listOfCiphertexts = parseFile(filename)
-    print(listOfCiphertexts)
     listOfPlaintexts = [decrypt(ciphertext) for ciphertext in listOfCiphertexts]
-    print(listOfPlaintexts)
-    print('in challenge 4')
-    return pickPlaintext(listOfPlaintexts)
+    bestGuess = pickPlaintext(listOfPlaintexts)
+    return bestGuess
     
 #given a filename, parses and on each newline adds the string to a list
 def parseFile(filename):
-    result = ['1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736', '65656565', '2727272727']
+    result = []
+    with open(filename, 'r') as textfile:
+        for line in textfile:
+            result.append(line)
     return result

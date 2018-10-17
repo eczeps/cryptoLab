@@ -1,12 +1,20 @@
 #4.5 hrs
 
+
+'''YOURE DECRYPTING SOME OF THEM WRONG!!! YOUR POTENTIAL PLAINTEXTS ARE WRONG!!!
+try changing the keys to be bytes instead of strings. aka be careful with key types
+
+''''
+
+import pprint
+
+
 def main(ciphertext):
     return decrypt(ciphertext)
 
 def decrypt(ciphertext):
     allPlaintexts = getAllPlaintexts(ciphertext)
     bestPlaintext = pickPlaintext(allPlaintexts)
-    print('decrypt: ' + str(type(bestPlaintext)))
     return bestPlaintext
     
 
@@ -22,7 +30,6 @@ def getAllPlaintexts(ciphertext):
     for key in allKeys:
         bytesXOR = fixed_XOR(ciphertext, key)
         result.append(bytesXOR)
-    print('getAllPlaintexts: ' + str(type(result)))
     return result
 
 #edited!! different from the one in challenge2
@@ -32,17 +39,24 @@ def fixed_XOR(hexstr1, hexstr2):
     try:
         return bytes.fromhex(hexXOR[2:])
     except ValueError or TypeError:
-        print('value error in fixedXOR')
-        return bytes.fromhex(hexXOR[2:] + '0')
+        return bytes.fromhex('0' + hexXOR[2:])
+        
     
 #given a list of plaintexts in bytes, return the most likely one still in bytes
 def pickPlaintext(allPlaintexts):
+    '''
     listOfFrequencyDicts = [getFrequencyDict(plaintext) for plaintext in allPlaintexts]
     listOfScores = [scoreFrequencyDict(freqDict) for freqDict in listOfFrequencyDicts]
+    zipped = list(zip(listOfScores, allPlaintexts))
+    filtered = [entry for entry in zipped if entry[0] > 0]
+    pprint.pprint(filtered)
+    '''
+    listOfScores = [scorePlaintext(plaintext) for plaintext in allPlaintexts]
+    zipped = list(zip(listOfScores, allPlaintexts))
+    filtered = [entry for entry in zipped if entry[0] > 50]
+    pprint.pprint(filtered)
     bestGuessIndex = listOfScores.index(max(listOfScores))
     bestGuess = allPlaintexts[bestGuessIndex]
-    #convert bestGuess to printable bytes
-    print('pickPlaintext: ' + str(type(bestGuess)))
     return bestGuess
 
     
@@ -55,16 +69,56 @@ def getFrequencyDict(plaintext):
         listOfBytes = list(plaintext)
     except ValueError:
         #sometimes it shaves off the last 0 of plaintext, and then this throws an error
-        listOfBytes = list(plaintext + '0')
+        listOfBytes = list('0' + plaintext)
     for byte in listOfBytes:
         if byte not in result.keys():
             result[byte] = 1
         else:
             result[byte] +=1
-    print('getFrequencyDict' + str(type(result)))
     return result
     
-
+    
+def scorePlaintext(plaintext):
+    score = 0
+    scoresDict = {b'e': 13, b'E': 13,
+                    b't': 12, b'T': 12,
+                    b'a': 11, b'A': 11,
+                    b'o': 10, b'O': 10,
+                    b'i': 9, b'I': 9,
+                    b's': 8, b'S': 8,
+                    b'r': 7, b'R': 7,
+                    b'h': 6, b'H': 6,
+                    b'l': 5, b'L': 5,
+                    b'd': 4, b'D': 4,
+                    b'c': 3, b'C': 3,
+                    b'u': 2, b'U': 2,
+                    b'm': 1, b'M': 1,
+                    b'f': -1, b'F': -1,
+                    b'p': -2, b'P': -2,
+                    b'g': -3, b'G': -3,
+                    b'w': -4, b'W': -4,
+                    b'y': -5, b'Y': -5,
+                    b'b': -6, b'B': -6,
+                    b'v': -7, b'V': -7,
+                    b'k': -8, b'K': -8,
+                    b'x': -9, b'X': -9,
+                    b'j': -10, b'J': -10,
+                    b'q': -11, b'Q': -11,
+                    b'z': -12, b'Z': -12,
+                    }
+    for char in plaintext:
+        char = bytes([char])
+        if char < b' ' or char > b'~':
+            return - 1000
+        elif char == b' ':
+            print('hello')
+            score += 100
+        else:
+            score += scoresDict.get(char, 0)
+    return score
+    
+    
+'''
 def scoreFrequencyDict(frequencyDict):
     score = 0
     #discard dict if it has nonprintable chars:
@@ -80,9 +134,9 @@ def scoreFrequencyDict(frequencyDict):
     inverse = [(value, key) for key, value in frequencyDict.items()]
     sorted_by_value = sorted(inverse, key=lambda tup: tup[0])
     #can play around with the indices we use from sorted_by_value
-    mostCommon = [elt[1] for elt in sorted_by_value[-8:]]
+    mostCommon = [elt[1] for elt in sorted_by_value[-6:]]
     #if it's an E or e
-    if 69 in mostCommon or 101 in mostCommon:
+    if b'e' in mostCommon or b'E' in mostCommon:
         score += 13
     #if it's T or t
     if 84 in mostCommon or 116 in mostCommon:
@@ -144,6 +198,5 @@ def scoreFrequencyDict(frequencyDict):
     #if it's Z or z
     if 90 in mostCommon or 122 in mostCommon:
         score -= 13
-    print('scoreFrequencyDict' + str(type(score)))
     return score
-    
+'''
