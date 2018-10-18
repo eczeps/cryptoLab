@@ -1,10 +1,10 @@
-#4.5 hrs
+#5.5 hrs
 
 
 '''YOURE DECRYPTING SOME OF THEM WRONG!!! YOUR POTENTIAL PLAINTEXTS ARE WRONG!!!
 try changing the keys to be bytes instead of strings. aka be careful with key types
 
-''''
+'''
 
 import pprint
 
@@ -24,9 +24,10 @@ def getAllPlaintexts(ciphertext):
     #just generating a list of all the possible bytes:
     digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
     keyBytes = [a + b for a in digits for b in digits]
+    #keyBytes = [x for x in range(0xFF+1)]
     #how many times you have to repeat each key char to make it the length of ciphertext
     length = int(len(ciphertext)/2)
-    allKeys = [byte*length for byte in keyBytes]
+    allKeys = [hex(int('0x' + byte*length, 16)) for byte in keyBytes]
     for key in allKeys:
         bytesXOR = fixed_XOR(ciphertext, key)
         result.append(bytesXOR)
@@ -54,7 +55,7 @@ def pickPlaintext(allPlaintexts):
     listOfScores = [scorePlaintext(plaintext) for plaintext in allPlaintexts]
     zipped = list(zip(listOfScores, allPlaintexts))
     filtered = [entry for entry in zipped if entry[0] > 50]
-    pprint.pprint(filtered)
+    #pprint.pprint(filtered)
     bestGuessIndex = listOfScores.index(max(listOfScores))
     bestGuess = allPlaintexts[bestGuessIndex]
     return bestGuess
@@ -111,7 +112,6 @@ def scorePlaintext(plaintext):
         if char < b' ' or char > b'~':
             return - 1000
         elif char == b' ':
-            print('hello')
             score += 100
         else:
             score += scoresDict.get(char, 0)
