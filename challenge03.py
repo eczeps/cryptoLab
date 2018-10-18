@@ -24,10 +24,12 @@ def getAllPlaintexts(ciphertext):
     #just generating a list of all the possible bytes:
     digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
     keyBytes = [a + b for a in digits for b in digits]
+    print(keyBytes)
+    #keyBytes = ['61']
     #keyBytes = [x for x in range(0xFF+1)]
     #how many times you have to repeat each key char to make it the length of ciphertext
     length = int(len(ciphertext)/2)
-    allKeys = [hex(int('0x' + byte*length, 16)) for byte in keyBytes]
+    allKeys = [(byte*length).encode() for byte in keyBytes]
     for key in allKeys:
         bytesXOR = fixed_XOR(ciphertext, key)
         result.append(bytesXOR)
@@ -55,7 +57,7 @@ def pickPlaintext(allPlaintexts):
     listOfScores = [scorePlaintext(plaintext) for plaintext in allPlaintexts]
     zipped = list(zip(listOfScores, allPlaintexts))
     filtered = [entry for entry in zipped if entry[0] > 50]
-    #pprint.pprint(filtered)
+    pprint.pprint(filtered)
     bestGuessIndex = listOfScores.index(max(listOfScores))
     bestGuess = allPlaintexts[bestGuessIndex]
     return bestGuess
@@ -110,8 +112,10 @@ def scorePlaintext(plaintext):
     for char in plaintext:
         char = bytes([char])
         if char < b' ' or char > b'~':
-            return - 1000
+            #return - 1000
+            print('unprintable')
         elif char == b' ':
+            print('space')
             score += 100
         else:
             score += scoresDict.get(char, 0)
