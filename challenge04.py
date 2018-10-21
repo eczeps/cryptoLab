@@ -1,4 +1,4 @@
-#6 hrs (also refining challenge 3)
+#6 hrs (mostly refining challenge 3)
 #NOTE: MAKE SURE THAT YOU'VE SYNCED DIRECTORY TO THE EDITOR (BOTTOM RIGHT IN CANOPY)
 
 from challenge03 import *
