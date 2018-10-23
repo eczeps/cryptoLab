@@ -12,7 +12,7 @@ def main(filename):
     listOfPlaintexts = [decrypt(ciphertext) for ciphertext in listOfCiphertexts]
     #print(listOfPlaintexts)
     bestGuess = pickPlaintext(listOfPlaintexts)
-    return bestGuess
+    return bestGuess[0]
     
 #given a filename, parses and on each newline adds the string to a list
 def parseFile(filename):
