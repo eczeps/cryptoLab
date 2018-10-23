@@ -44,3 +44,29 @@ def findKeySize(bytesString):
             shortestDistance = normalizedDistance
             bestKEYSIZE = KEYSIZE
     return bestKEYSIZE
+    
+def listOfBlocks(bytesString, keySize):
+    #ASSUMES KEYSIZE <= LEN(BYTESSTRING)
+    result = []
+    numBlocks = int(len(bytesString)/keySize)
+    for block in range(numBlocks):
+        result.append(bytesString[block*keySize:(block+1)*keySize])
+    #the above code cuts off chars that don't fit evenly, so we add htem ourselves:
+    if (block + 1)*keySize < len(bytesString):
+        result.append(bytesString[(block+1)*keySize:])
+    return result
+    
+def getTransposedBlocks(listOfBlocks):
+    #TAKES IN LIST OF BYTESTRINGS. ALL MUST BE EQUAL LENGTH EXCEPT THE LAST ONE
+    result = []
+    numTransposedBlocks = len(listOfBlocks[0])
+    for transposedBlock in range(numTransposedBlocks):
+        #listOfBlocks is in a list because bytes takes a list of ints
+        result.insert(transposedBlock, bytes([listOfBlocks[0][transposedBlock]]))
+        for i in range(1, len(listOfBlocks)):
+            try:
+                result[transposedBlock] += bytes([listOfBlocks[i][transposedBlock]])
+            except IndexError:
+                #this just happens on the last item in listOfBlocks. nbd
+                pass
+    return result
