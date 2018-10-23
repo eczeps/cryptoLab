@@ -1,6 +1,7 @@
 #30 min
 import binascii
 
+
 def hammingDistance(string1, string2):
     #  assumes string1 >= string2
     ham = 0
