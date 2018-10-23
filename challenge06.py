@@ -1,5 +1,24 @@
-#30 min
+#3; includes time making 3 and 4 compatible
+'''NOT FINISHED'''
 import binascii
+from challenge03 import *
+
+
+def main(filename):
+    #ciphertext should be a bytes string
+    ciphertext = readFile(filename)
+    keySize = findKeySize(ciphertext)
+    listOfBlocks = getListOfBlocks(ciphertext, keySize)
+    transposedBlocks = getTransposedBlocks(listOfBlocks)
+    key = getKey(transposedBlocks, keySize)
+    
+
+def readFile(filename):
+    result = ""
+    with open(filename, 'r') as textfile:
+        for line in textfile:
+            result += line
+    return binascii.a2b_qp(result)
 
 
 def hammingDistance(string1, string2):
@@ -33,10 +52,8 @@ def findKeySize(bytesString):
     shortestDistance = len(bytesString)
     for KEYSIZE in range(2, min(40, len(bytesString) -1)):
         first = bytesString[:KEYSIZE]
-        print(first)
         try:
             second = bytesString[KEYSIZE:2*KEYSIZE]
-            print(second)
         except IndexError:
             second = bytesString[KEYSIZE:]
         distance = hammingDistance(first, second)
@@ -46,7 +63,7 @@ def findKeySize(bytesString):
             bestKEYSIZE = KEYSIZE
     return bestKEYSIZE
     
-def listOfBlocks(bytesString, keySize):
+def getListOfBlocks(bytesString, keySize):
     #ASSUMES KEYSIZE <= LEN(BYTESSTRING)
     result = []
     numBlocks = int(len(bytesString)/keySize)
@@ -71,3 +88,16 @@ def getTransposedBlocks(listOfBlocks):
                 #this just happens on the last item in listOfBlocks. nbd
                 pass
     return result
+
+def getKey(listOfTransposedBlocks, keySize):
+    key = ""
+    for i in range(keySize):
+        hexstr = ""
+        thisblock = listOfTransposedBlocks[i].decode()
+        for char in thisblock:
+            hexstr += str(hex(ord(char)))[2:]
+        print(hexstr)
+        decryption = decrypt(hexstr)
+        key += chr(int(str(decryption[1])[2:4]))
+    return key
+

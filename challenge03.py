@@ -30,8 +30,6 @@ def getAllPlaintexts(ciphertext):
 
 #edited!! different from the one in challenge2
 def fixed_XOR(hexstr1, hexstr2):
-    print(hexstr1)
-    print(hexstr2)
     intXOR = int(hexstr1, 16) ^ int(hexstr2, 16)
     hexXOR = hex(intXOR)
     try:
