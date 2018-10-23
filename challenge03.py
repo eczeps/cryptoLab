@@ -1,7 +1,6 @@
 #5.5 hrs
 
 
-import pprint
 
 
 def main(ciphertext):
@@ -10,7 +9,7 @@ def main(ciphertext):
 def decrypt(ciphertext):
     allPlaintexts = getAllPlaintexts(ciphertext)
     bestPlaintext = pickPlaintext(allPlaintexts)
-    return bestPlaintext
+    return (bestPlaintext[0])
     
 
 #generate a list of all possible plaintexts, still in bytes
@@ -26,7 +25,7 @@ def getAllPlaintexts(ciphertext):
     allKeys = [(byte*length).encode() for byte in keyBytes]
     for key in allKeys:
         bytesXOR = fixed_XOR(ciphertext, key)
-        result.append(bytesXOR)
+        result.append((bytesXOR, key))
     return result
 
 #edited!! different from the one in challenge2
@@ -50,13 +49,13 @@ def pickPlaintext(allPlaintexts):
     filtered = [entry for entry in zipped if entry[0] > 0]
     pprint.pprint(filtered)
     '''
-    listOfScores = [scorePlaintext(plaintext) for plaintext in allPlaintexts]
-    zipped = list(zip(listOfScores, allPlaintexts))
+    listOfScores = [scorePlaintext(plaintext[0]) for plaintext in allPlaintexts]
+    zipped = list(zip(listOfScores, allPlaintexts[0]))
     filtered = [entry for entry in zipped if entry[0] > 50]
     #pprint.pprint(filtered)
     bestGuessIndex = listOfScores.index(max(listOfScores))
     bestGuess = allPlaintexts[bestGuessIndex]
-    return bestGuess
+    return (bestGuess, bestGuessIndex)
 
     
 #returns frequency dict of each byte in plaintext, converted to decimal
