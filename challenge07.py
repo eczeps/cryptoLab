@@ -1,10 +1,9 @@
 #2 hr
 
 
-import binascii
-import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+import base64
 
 def main(filename, key):
     ciphertext = parseFile(filename)
@@ -12,18 +11,19 @@ def main(filename, key):
     plaintext = AESdecrypt(ciphertext, key)
     return plaintext
     
+def base64ToBytes(result):
+    return base64.decodebytes(result)
+    
 def parseFile(filename):
     result = ""
     with open(filename, 'r') as textfile:
-        for line in textfile:
-            result += line 
-    print(result[:40])
-    return result.encode()
+        result = textfile.read()
+    result = result.encode()
+    result = base64ToBytes(result)
+    return result
     
 
 def AESdecrypt(ciphertext, key):
-    key2 = os.urandom(32)
-    print(key2)
     backend = default_backend()
     algorithm = algorithms.AES(key)
     mode = modes.ECB()

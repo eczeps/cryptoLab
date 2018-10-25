@@ -35,11 +35,6 @@ def encrypt(plaintext, key):
     
 
 def fixed_xor(plaintext, key):
-    print(key)
-    print(bytes.hex(key))
-    print(plaintext)
-    print(bytes.hex(plaintext))
-    print(bytes.fromhex(bytes.hex(plaintext)))
     intXOR = int(bytes.hex(plaintext), 16) ^ int(bytes.hex(key), 16)
     hexXOR = hex(intXOR)
     try:

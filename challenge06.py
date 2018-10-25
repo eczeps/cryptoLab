@@ -1,25 +1,42 @@
 #3; includes time making 3 and 4 compatible
 '''NOT FINISHED'''
 import binascii
-from challenge03 import *
+from challenge03 import decrypt
+from challenge05 import fixed_xor, generateKey
+import base64
 
 
 def main(filename):
     #ciphertext should be a bytes string
-    ciphertext = readFile(filename)
-    keySize = findKeySize(ciphertext)
+    ciphertext = parseFile(filename)
+    #keySize = findKeySize(ciphertext)
+    keySize = 29
     listOfBlocks = getListOfBlocks(ciphertext, keySize)
     transposedBlocks = getTransposedBlocks(listOfBlocks)
     key = getKey(transposedBlocks, keySize)
+    #this line maybe needs to be moved to the top. unclear
+    ciphertext = base64BytesToHex(ciphertext)
+    longKey = generateKey(ciphertext, key.decode())
+    hexPlaintext = fixed_xor(longKey, ciphertext.encode()).decode()
+    print(hexPlaintext)
+    return hexPlaintext
     
-
-def readFile(filename):
+def base64ToHexBytes(result):
+    return base64.decodebytes(result)
+    
+def base64BytesToHex(ciphertext):
+    base64String = ciphertext.decode()
+    normalString = base64.b64decode(base64String)
+    hexString = base64.b16encode(normalString)
+    return hexString.decode()
+    
+def parseFile(filename):
     result = ""
     with open(filename, 'r') as textfile:
-        for line in textfile:
-            result += line
-    return binascii.a2b_qp(result)
-
+        result = textfile.read()
+    result = result.encode()
+    #result = base64ToHexBytes(result)
+    return result
 
 def hammingDistance(string1, string2):
     #  assumes string1 >= string2
@@ -40,8 +57,6 @@ def hammingDistance(string1, string2):
             if bin1[j] != bin2[j]:
                 ham += 1
     if len(string1) > len(string2):
-        print(ham)
-        print(len(string1) - len(string2))
         #8 bits per byte, char is 2 bytes, so we multiply by 4
         ham += (len(string1) - len(string2))*4
     return ham
@@ -96,8 +111,7 @@ def getKey(listOfTransposedBlocks, keySize):
         thisblock = listOfTransposedBlocks[i].decode()
         for char in thisblock:
             hexstr += str(hex(ord(char)))[2:]
-        print(hexstr)
         decryption = decrypt(hexstr)
-        key += chr(int(str(decryption[1])[2:4]))
-    return key
+        key += str(decryption[1])[2:4]
+    return key.encode()
 
