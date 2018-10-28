@@ -9,7 +9,7 @@ def main(filename):
     #check that you're parsing the file right
     pprint.pprint(listOfCiphertexts)
     #check the type of a ciphertext against what decrypt is expecting
-    listOfPlaintexts = [decrypt(ciphertext) for ciphertext in listOfCiphertexts]
+    listOfPlaintexts = [decryptSingleCharKey(ciphertext) for ciphertext in listOfCiphertexts]
     #print(listOfPlaintexts)
     bestGuess = pickPlaintext(listOfPlaintexts)
     return bestGuess[0]

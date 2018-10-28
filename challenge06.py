@@ -1,28 +1,26 @@
-#6; includes time making 3 and 4 compatible
-from challenge03 import decrypt
+#6.5; includes time making 3 and 4 compatible
+from challenge03 import decryptSingleCharKey
 from challenge05 import generateKey
 import base64
 
 
 def main(filename):
-    #ciphertext should be a bytes string
     ciphertext = parseFile(filename)
+    #ciphertext should be a bytes string
     ciphertext = base64StringToBytes(ciphertext)
-    #keySize = findKeySize(ciphertext)
-    #print(keySize)
-    keySize = 29
+    return decryptRepeatingKey(ciphertext)
+    
+def decryptRepeatingKey(ciphertext):
+    #ciphertext should be bytes string
+    keySize = findKeySize(ciphertext)
     listOfBlocks = getListOfBlocks(ciphertext, keySize)
     transposedBlocks = getTransposedBlocks(listOfBlocks)
     key = getKey(transposedBlocks, keySize)
-    print(key)
-    #key = b'Terminator X: Bring the noise'
-    #print(key)
     longKey = generateKey(ciphertext, key.decode())
     plaintext = bytesXOR(longKey, ciphertext)
-    #write an xor function that takes in bytes
     return plaintext
   
-'''this works'''  
+
 def bytesXOR(bytes1, bytes2):
     xored = bytes([a^b for (a, b) in zip(bytes1, bytes2)])
     return xored
@@ -44,33 +42,21 @@ def base64BytesToHexBytes(ciphertext):
 def bytesStringToHexString(bytesString):
     return base64.b16encode(bytesString)
     
-    
-'''FIRST ORDER OF BUSINESS: MAKE THIS WORK ON ALL HEX STRINGS
 
-
-
-
-V IMPORTANT
-
-
-
-DO FIRST
-
-'''
 def asciiHexToBytes(asciiHexStr):
+    #only works when letters in string are uppercase!!!
     return base64.b16decode(asciiHexStr)
     
-'''this works'''
+
 def parseFile(filename):
     result = ""
     with open(filename, 'r') as textfile:
         result = textfile.read()
     result = result.encode()
-    #result = base64ToHexBytes(result)
     return result
 
 
-'''pretty sure this works'''   
+  
 def hammingDistance(bytes1, bytes2):
     #  assumes bytes1 >= bytes2
     ham = 0
@@ -88,8 +74,8 @@ def hammingDistance(bytes1, bytes2):
             if bin1[j] != bin2[j]:
                 ham += 1
     if len(bytes1) > len(bytes2):
-        #8 bits per byte, char is 2 bytes, so we multiply by 4
-        ham += (len(bytes1) - len(bytes2))
+        #feel like this never happens/this hasn't been tested
+        ham += (len(bytes1) - len(bytes2))*8
     return ham
     
 '''
@@ -120,18 +106,30 @@ def hammingDistance(string1, string2):
     return ham
     '''
 def findKeySize(bytesString):
-    #think real hard if this should take a string or bytes
     bestKEYSIZE = 0
     shortestDistance = len(bytesString)
+    print(shortestDistance)
     for KEYSIZE in range(2, min(40, len(bytesString) -1)):
         first = bytesString[:KEYSIZE]
         try:
             second = bytesString[KEYSIZE:2*KEYSIZE]
+            third = bytesString[KEYSIZE*2:KEYSIZE*3]
+            fourth = bytesString[KEYSIZE*3:KEYSIZE*4]
+            fifth = bytesString[KEYSIZE*4:KEYSIZE*5]
+            sixth = bytesString[KEYSIZE*5:KEYSIZE*6]
+            distance1 = hammingDistance(first, fourth)
+            distance2 = hammingDistance(second, fifth)
+            distance3 = hammingDistance(third, sixth)
+            normalizedDistance1 = distance1/KEYSIZE
+            normalizedDistance2 = distance2/KEYSIZE
+            normalizedDistance3 = distance3/KEYSIZE
+            normalizedDistance = (normalizedDistance1 + normalizedDistance2 + normalizedDistance3)/3
         except IndexError:
             print('index error')
             second = bytesString[KEYSIZE:]
-        distance = hammingDistance(first, second)
-        normalizedDistance = distance/KEYSIZE
+            distance = hammingDistance(first, second)
+            normalizedDistance = distance/KEYSIZE
+            
         if normalizedDistance < shortestDistance:
             print(normalizedDistance)
             shortestDistance = normalizedDistance
@@ -169,12 +167,10 @@ def getKey(listOfTransposedBlocks, keySize):
     for i in range(keySize):
         thisblock = listOfTransposedBlocks[i]
         hexstr = bytesStringToHexString(thisblock)
-        decryption = decrypt(hexstr)
+        decryption = decryptSingleCharKey(hexstr)
         #key should be a bytes string that looks like b'abc'
         hexStrChar = str(decryption[1])[2:4]
-        #key += chr((int(str(decryption[1])[2:4])))
         key += hexStrChar[0].upper()
         key += hexStrChar[1].upper()
-    print(key)
     return asciiHexToBytes(key)
 

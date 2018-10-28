@@ -4,9 +4,9 @@
 
 
 def main(ciphertext):
-    return decrypt(ciphertext)
+    return decryptSingleCharKey(ciphertext)
 
-def decrypt(ciphertext):
+def decryptSingleCharKey(ciphertext):
     allPlaintexts = getAllPlaintexts(ciphertext)
     bestPlaintext = pickPlaintext(allPlaintexts)
     return (bestPlaintext[0])
