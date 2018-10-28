@@ -28,8 +28,6 @@ def generateKey(plaintext, key):
 #both arguments should be in BYTES
 def encrypt(plaintext, key):
     bytesKey = generateKey(plaintext, key)
-    print(len(bytesKey))
-    print(len(plaintext))
     XOR = fixed_xor(plaintext, bytesKey)
     return XOR
     
@@ -38,8 +36,6 @@ def fixed_xor(plaintext, key):
     intXOR = int(bytes.hex(plaintext), 16) ^ int(bytes.hex(key), 16)
     hexXOR = hex(intXOR)
     try:
-        print('try')
         return bytes.fromhex(hexXOR[2:])
     except ValueError or TypeError:
-        print('except')
         return bytes.fromhex('0' + hexXOR[2:])
