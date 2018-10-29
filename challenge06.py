@@ -1,6 +1,5 @@
 #6.5; includes time making 3 and 4 compatible
 from challenge03 import decryptSingleCharKey
-from challenge05 import generateKey
 import base64
 
 
@@ -16,9 +15,19 @@ def decryptRepeatingKey(ciphertext):
     listOfBlocks = getListOfBlocks(ciphertext, keySize)
     transposedBlocks = getTransposedBlocks(listOfBlocks)
     key = getKey(transposedBlocks, keySize)
-    longKey = generateKey(ciphertext, key.decode())
+    longKey = betterGenerateKey(ciphertext, key)
     plaintext = bytesXOR(longKey, ciphertext)
     return plaintext
+    
+#there's a bad version in challenge05
+def betterGenerateKey(ciphertext, bytesKey):
+    length = len(ciphertext)
+    #this is the key repeated all the times its repeated fully. i.e. ICE not ICEI
+    shortkey = bytesKey*(int((length/len(bytesKey))))
+    mod = length%len(bytesKey)
+    #adds the part that didn't divide evenly
+    fullkey = shortkey + bytesKey[:mod]
+    return fullkey
   
 
 def bytesXOR(bytes1, bytes2):
@@ -108,30 +117,50 @@ def hammingDistance(string1, string2):
 def findKeySize(bytesString):
     bestKEYSIZE = 0
     shortestDistance = len(bytesString)
-    print(shortestDistance)
-    for KEYSIZE in range(2, min(40, len(bytesString) -1)):
+    for KEYSIZE in range(1, min(40, len(bytesString))):
         first = bytesString[:KEYSIZE]
         try:
             second = bytesString[KEYSIZE:2*KEYSIZE]
             third = bytesString[KEYSIZE*2:KEYSIZE*3]
             fourth = bytesString[KEYSIZE*3:KEYSIZE*4]
             fifth = bytesString[KEYSIZE*4:KEYSIZE*5]
-            sixth = bytesString[KEYSIZE*5:KEYSIZE*6]
-            distance1 = hammingDistance(first, fourth)
-            distance2 = hammingDistance(second, fifth)
-            distance3 = hammingDistance(third, sixth)
-            normalizedDistance1 = distance1/KEYSIZE
-            normalizedDistance2 = distance2/KEYSIZE
-            normalizedDistance3 = distance3/KEYSIZE
-            normalizedDistance = (normalizedDistance1 + normalizedDistance2 + normalizedDistance3)/3
+            distance1 = hammingDistance(first, second)/KEYSIZE
+            distance2 = hammingDistance(first, third)/KEYSIZE
+            distance3 = hammingDistance(first, fourth)/KEYSIZE
+            distance4 = hammingDistance(second, third)/KEYSIZE
+            distance5 = hammingDistance(second, fourth)/KEYSIZE
+            distance6 = hammingDistance(third, fourth)/KEYSIZE
+            distance7 = hammingDistance(fifth, first)/KEYSIZE
+            distance8 = hammingDistance(fifth, second)/KEYSIZE
+            distance9 = hammingDistance(fifth, third)/KEYSIZE
+            distance10 = hammingDistance(fifth, fourth)/KEYSIZE
+            normalizedDistance = (distance1 + distance2 + distance3 + distance4\
+            + distance5 + distance6 + distance7 + distance8 + distance9\
+            + distance10)/10
         except IndexError:
-            print('index error')
-            second = bytesString[KEYSIZE:]
-            distance = hammingDistance(first, second)
-            normalizedDistance = distance/KEYSIZE
+            try:
+                second = bytesString[KEYSIZE:2*KEYSIZE]
+                third = bytesString[KEYSIZE*2:KEYSIZE*3]
+                fourth = bytesString[KEYSIZE*3:KEYSIZE*4]
+                distance1 = hammingDistance(first, second)/KEYSIZE
+                distance2 = hammingDistance(first, third)/KEYSIZE
+                distance3 = hammingDistance(first, fourth)/KEYSIZE
+                distance4 = hammingDistance(second, third)/KEYSIZE
+                distance5 = hammingDistance(second, fourth)/KEYSIZE
+                distance6 = hammingDistance(third, fourth)/KEYSIZE
+                normalizedDistance = (distance1 + distance2 + distance3 + distance4\
+                + distance5 + distance6)/6
+            except IndexError:
+                try:
+                    second = bytesString[KEYSIZE:2*KEYSIZE]
+                    distance = hammingDistance(first, second)
+                    normalizedDistance = distance/KEYSIZE
+                except IndexError:
+                    second = bytesString[KEYSIZE:]
+                    distance = hammingDistance(first, second)
+                    normalizedDistance = distance/KEYSIZE
             
         if normalizedDistance < shortestDistance:
-            print(normalizedDistance)
             shortestDistance = normalizedDistance
             bestKEYSIZE = KEYSIZE
     return bestKEYSIZE
@@ -150,6 +179,7 @@ def getListOfBlocks(bytesString, keySize):
 def getTransposedBlocks(listOfBlocks):
     #TAKES IN LIST OF BYTESTRINGS. ALL MUST BE EQUAL LENGTH EXCEPT THE LAST ONE
     result = []
+    print(listOfBlocks)
     numTransposedBlocks = len(listOfBlocks[0])
     for transposedBlock in range(numTransposedBlocks):
         #listOfBlocks is in a list because bytes takes a list of ints
@@ -158,6 +188,7 @@ def getTransposedBlocks(listOfBlocks):
             try:
                 result[transposedBlock] += bytes([listOfBlocks[i][transposedBlock]])
             except IndexError:
+                print('yikes')
                 #this just happens on the last item in listOfBlocks. nbd
                 pass
     return result
