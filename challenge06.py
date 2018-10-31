@@ -9,7 +9,9 @@ def main(filename):
     ciphertext = base64StringToBytes(ciphertext)
     return decryptRepeatingKey(ciphertext)
     
+    
 def decryptRepeatingKey(ciphertext):
+    print(ciphertext)
     #ciphertext should be bytes string
     keySize = findKeySize(ciphertext)
     listOfBlocks = getListOfBlocks(ciphertext, keySize)
@@ -179,7 +181,6 @@ def getListOfBlocks(bytesString, keySize):
 def getTransposedBlocks(listOfBlocks):
     #TAKES IN LIST OF BYTESTRINGS. ALL MUST BE EQUAL LENGTH EXCEPT THE LAST ONE
     result = []
-    print(listOfBlocks)
     numTransposedBlocks = len(listOfBlocks[0])
     for transposedBlock in range(numTransposedBlocks):
         #listOfBlocks is in a list because bytes takes a list of ints
@@ -188,7 +189,6 @@ def getTransposedBlocks(listOfBlocks):
             try:
                 result[transposedBlock] += bytes([listOfBlocks[i][transposedBlock]])
             except IndexError:
-                print('yikes')
                 #this just happens on the last item in listOfBlocks. nbd
                 pass
     return result
