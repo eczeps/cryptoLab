@@ -1,10 +1,9 @@
 #3.5 hrs; most of it spent fixing challenge06
-from challenge06 import decryptRepeatingKey
 
 def main(filename):
     listOfCiphertexts = parseFile(filename)
     likelyEncrypted = findLikelyEncrypted(listOfCiphertexts)
-    return decryptRepeatingKey(likelyEncrypted)
+    return likelyEncrypted
     
 #given a filename, parses and on each newline adds the string to a list
 def parseFile(filename):

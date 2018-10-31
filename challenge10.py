@@ -1,32 +1,29 @@
-#
+#1.5
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-from challenge06 import bytesXOR, parseFile
+from challenge06 import bytesXOR, parseFile, base64StringToBytes
 from challenge09 import PKCS7pad
 
 def main(filename):
     ciphertext = parseFile(filename)
+    ciphertext = base64StringToBytes(ciphertext)
     decrypted = CBCdecrypt(ciphertext, b"YELLOW SUBMARINE", b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-    #b"\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30"
-    print(decrypted)
     encrypted = CBCencrypt(decrypted, b"YELLOW SUBMARINE", b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-    #return encrypted == ciphertext
-    return encrypted
+    return encrypted == ciphertext
     
     
 
 
-def CBCdecrypt(plaintext, key, IV):
-    listOfBlocks = getListOfBlocks(plaintext)
+def CBCdecrypt(ciphertext, key, IV):
+    listOfBlocks = getListOfBlocks(ciphertext)
     previousBlock = IV
     result = b""
     for i in range(len(listOfBlocks)):
         thisBlock = listOfBlocks[i]
-        #why does AES decrypt take the IV??????/
         decrypted = AESdecrypt(thisBlock, key, IV)
         xord = bytesXOR(previousBlock, decrypted)
-        previousBlock = thisBlock
         result += xord
+        previousBlock = thisBlock
     return result
 
 
@@ -52,15 +49,17 @@ def getListOfBlocks(plaintext):
         else:
             result[-1] += bytes([plaintext[i]])
     if len(result[-1]) != 16:
+        print('hello')
         result[-1] = PKCS7pad(result[-1], 16)
     return result
     
     
-    
+
+#mske these not take IV later
 def AESdecrypt(ciphertext, key, IV):
     backend = default_backend()
     algorithm = algorithms.AES(key)
-    mode = modes.CBC(IV)
+    mode = modes.ECB()
     cipher = Cipher(algorithm, mode, backend=backend)
     decryptor = cipher.decryptor()
     return decryptor.update(ciphertext) + decryptor.finalize()
@@ -70,7 +69,7 @@ def AESdecrypt(ciphertext, key, IV):
 def AESencrypt(plaintext, key, IV):
     backend = default_backend()
     algorithm = algorithms.AES(key)
-    mode = modes.CBC(IV)
+    mode = modes.ECB()
     cipher = Cipher(algorithm, mode, backend=backend)
     encryptor = cipher.encryptor()
     return encryptor.update(plaintext) + encryptor.finalize()

@@ -11,9 +11,9 @@ def main(filename):
     
     
 def decryptRepeatingKey(ciphertext):
-    print(ciphertext)
     #ciphertext should be bytes string
     keySize = findKeySize(ciphertext)
+    print(keySize)
     listOfBlocks = getListOfBlocks(ciphertext, keySize)
     transposedBlocks = getTransposedBlocks(listOfBlocks)
     key = getKey(transposedBlocks, keySize)
@@ -161,7 +161,7 @@ def findKeySize(bytesString):
                     second = bytesString[KEYSIZE:]
                     distance = hammingDistance(first, second)
                     normalizedDistance = distance/KEYSIZE
-            
+        print(normalizedDistance)
         if normalizedDistance < shortestDistance:
             shortestDistance = normalizedDistance
             bestKEYSIZE = KEYSIZE

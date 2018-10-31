@@ -103,9 +103,11 @@ def scorePlaintext(plaintext):
                     b'z': -12, b'Z': -12,
                     }
     for char in plaintext:
+        if char < 32 or char > 127:
+            score -= 30
         char = bytes([char])
         if char == b' ':
-            score += 100
+            score += 14
         else:
             score += scoresDict.get(char, 0)
     return score
