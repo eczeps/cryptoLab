@@ -20,7 +20,7 @@ def CBCdecrypt(ciphertext, key, IV):
     result = b""
     for i in range(len(listOfBlocks)):
         thisBlock = listOfBlocks[i]
-        decrypted = AESdecrypt(thisBlock, key, IV)
+        decrypted = AESdecrypt(thisBlock, key)
         xord = bytesXOR(previousBlock, decrypted)
         result += xord
         previousBlock = thisBlock
@@ -34,7 +34,7 @@ def CBCencrypt(plaintext, key, IV):
     for i in range(len(listOfBlocks)):
         thisBlock = listOfBlocks[i]
         xord = bytesXOR(previousBlock, thisBlock)
-        encrypted = AESencrypt(xord, key, IV)
+        encrypted = AESencrypt(xord, key)
         previousBlock = encrypted
         result += encrypted
     return result
@@ -55,8 +55,7 @@ def getListOfBlocks(plaintext):
     
     
 
-#mske these not take IV later
-def AESdecrypt(ciphertext, key, IV):
+def AESdecrypt(ciphertext, key):
     backend = default_backend()
     algorithm = algorithms.AES(key)
     mode = modes.ECB()
@@ -66,7 +65,7 @@ def AESdecrypt(ciphertext, key, IV):
     
     
     
-def AESencrypt(plaintext, key, IV):
+def AESencrypt(plaintext, key):
     backend = default_backend()
     algorithm = algorithms.AES(key)
     mode = modes.ECB()

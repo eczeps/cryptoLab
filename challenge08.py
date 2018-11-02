@@ -33,7 +33,7 @@ def numRepeatedBlocks(ciphertext):
     #this is a less strict way of doing it, but it works for this exercise
     #blockList = [ciphertext[16*i:16*(i+1)] for i in range(0, int(len(ciphertext)/16))]
     #use this if results stop being precise enough
-    blockList = [ciphertext[i: i + 16] for i in range(0, len(ciphertext) - 16)]
+    blockList = [ciphertext[i: i + 16] for i in range(0, len(ciphertext) - 15)]
     duplicates = 0
     seen = []
     for block in blockList:
