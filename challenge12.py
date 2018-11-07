@@ -69,13 +69,14 @@ def breakECBOracle(blockSize):
     return result
     '''
     
-def getByteOfPlaintext(blockSize, whichByte, bytesSoFar):
+def getByteOfPlaintext(blockSize, whichByte, bytesSoFar, whichBlock):
+    #whichBlock starts at 0!
     #whichByte is the index of the byte we're looking for
     yourString = b'A'*(whichByte)
     ciphertext = ECBOracle(yourString)
     possibilityDict = dictOfOutputs(yourString, bytesSoFar)
     for k, v in possibilityDict.items():
-        if ciphertext[:16] == v[:16]: 
+        if ciphertext[whichBlock*16:(whichBlock + 1)*16] == v[whichBlock*16:(whichBlock + 1)*16]: 
             return k
     return None
     
@@ -94,10 +95,18 @@ def dictOfOutputs(repeatingString, bytesSoFar):
 def breakECBOracle(blockSize):
     result = b""
     iterList = range(blockSize)[::-1] #reversed
-    for i in iterList:
-        #i is the index of the byte we're looking for
-        print(i)
-        thisByte = getByteOfPlaintext(blockSize, i, result)
-        result += thisByte
-        print(result)
+    whichBlock = 0
+    try:
+        while True:
+            for i in iterList:
+                #i is the index of the byte we're looking for
+                print(i)
+                #whichBlock has to start at 0!
+                thisByte = getByteOfPlaintext(blockSize, i, result, whichBlock)
+                result += thisByte
+                print(result)
+            whichBlock += 1
+    except Exception:
+        #we just reached the end of the string we're finding
+        pass
     return result
