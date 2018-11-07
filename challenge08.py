@@ -36,9 +36,9 @@ def numRepeatedBlocks(ciphertext):
     blockList = [ciphertext[i: i + 16] for i in range(0, len(ciphertext) - 15)]
     duplicates = 0
     seen = []
-    for block in blockList:
-        if block not in seen:
-            seen.append(block)
+    for i in range(len(blockList)):
+        if blockList[i] not in seen:
+            seen.append(blockList[i])
         else:
             duplicates += 1
     return duplicates

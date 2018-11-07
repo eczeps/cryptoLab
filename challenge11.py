@@ -1,4 +1,4 @@
-#
+#3 hrs
 from random import *
 from challenge10 import *
 from challenge09 import PKCS7pad
@@ -12,6 +12,7 @@ counting function is messed up but it's super unclear why??? '''
 def main(filename):
     plaintext = parseFile(filename)
     ciphertext = encryptionOracle(plaintext)
+    print(ciphertext)
     return detectECBorCBC(ciphertext)
 
 def detectECBorCBC(ciphertext):
@@ -31,10 +32,8 @@ def encryptionOracle(plaintext):
     key = random16Bytes()
     padLens = randrange(5, 11)
     plaintext = padPlaintext(plaintext, padLens, padLens)
-    print(plaintext)
     ECBorCBC = randrange(0, 2)
-    #if ECBorCBC == 1:
-    if True:
+    if ECBorCBC == 1:
         print("using ECB")
         length = next16Multiple(len(plaintext))
         plaintext = PKCS7pad(plaintext, length)
