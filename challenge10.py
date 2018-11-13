@@ -49,7 +49,6 @@ def getListOfBlocks(plaintext):
         else:
             result[-1] += bytes([plaintext[i]])
     if len(result[-1]) != 16:
-        print('hello')
         result[-1] = PKCS7pad(result[-1], 16)
     return result
     

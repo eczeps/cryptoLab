@@ -1,18 +1,20 @@
-#3
+#4
 import base64
 from challenge10 import AESencrypt
 from challenge11 import random16Bytes, next16Multiple, detectECBorCBC
 from challenge09 import PKCS7pad
+from challenge15 import stripPKCS7
 
 
 KEY = random16Bytes()
 
 def main():
     blockSize = findBlockSize(KEY)
-    if detectECBorCBC() == "ECB":
-        yourString = b"A"*(blockSize - 1)
-    ciphertext = ECBOracle(yourString)
-    return ciphertext
+    ciphertext = ECBOracle(b"12345678901234561234567890123456")
+    if detectECBorCBC(ciphertext) == "ECB":
+        return breakECBOracle(blockSize)
+    else:
+        return None
 
 def ECBOracle(yourString):
     #yourString should be a BYTEstring
@@ -26,48 +28,10 @@ def ECBOracle(yourString):
     
 def findBlockSize(key):
     #idk
+    #keep adding bytes until the length of the ciphertext jumps and see how much it jumps by
     return 16
     
-    '''
-def getByteOfPlaintext(whichByte, bytesSoFar):
-    #assert len(bytesSoFar) + whichByte = blockSize
-    yourString = b'A'*(whichByte)
-    ciphertext = ECBOracle(yourString)
-    possibilityDict = dictOfOutputs(yourString, whichByte)
-    #all this indexing nonsense is so we only compare the repeating bytes and one after
-    if whichByte == 1:
-        #when it's -1 you can't do +1 because it'll wrap around
-        condition = ciphertext
-    else:
-        condition = ciphertext[:-whichByte + 1]
-    for k, v in possibilityDict.items():
-        #not sure this indexing is right
-        if condition == v:
-            return k
-    return None
     
-    
-    
-def dictOfOutputs(repeatingString, whichByte):
-    #{b"A": ECBOracle(b"AAAAAA"), b"B": ECBOracle(b"AAAAAAB")}
-    result = {}
-    lastBytes = [bytes([x]) for x in range(256)]
-    if whichByte == 1:
-        index = ""
-    else:
-         index = -whichByte + 1
-    for byte in lastBytes:
-        result[byte] = ECBOracle(repeatingString + byte)[:index]
-    return result
-    
-    
-def breakECBOracle(blockSize):
-    result = b""
-    for i in range(1, blockSize):
-        thisByte = getByteOfPlaintext(blockSize, i)
-        result += thisByte
-    return result
-    '''
     
 def getByteOfPlaintext(blockSize, whichByte, bytesSoFar, whichBlock):
     #whichBlock starts at 0!
@@ -76,7 +40,7 @@ def getByteOfPlaintext(blockSize, whichByte, bytesSoFar, whichBlock):
     ciphertext = ECBOracle(yourString)
     possibilityDict = dictOfOutputs(yourString, bytesSoFar)
     for k, v in possibilityDict.items():
-        if ciphertext[whichBlock*16:(whichBlock + 1)*16] == v[whichBlock*16:(whichBlock + 1)*16]: 
+        if ciphertext[whichBlock*blockSize:(whichBlock + 1)*blockSize] == v[whichBlock*blockSize:(whichBlock + 1)*blockSize]: 
             return k
     return None
     
@@ -86,7 +50,6 @@ def dictOfOutputs(repeatingString, bytesSoFar):
     #{b"A": ECBOracle(b"AAAAAA"), b"B": ECBOracle(b"AAAAAAB")}
     result = {}
     lastBytes = [bytes([x]) for x in range(256)]
-    print(repeatingString + lastBytes[2] + bytesSoFar)
     for byte in lastBytes:
         result[byte] = ECBOracle(repeatingString + bytesSoFar + byte)
     return result
@@ -98,15 +61,16 @@ def breakECBOracle(blockSize):
     whichBlock = 0
     try:
         while True:
+            #this is a little bit yikes but it's just going to keep looping until
+            #we get to the end of the string we're figuring out
+            #hard to make a condition because we don't know how long that string is
+            #the condition here is essentially loop while we don't have an exception
             for i in iterList:
-                #i is the index of the byte we're looking for
-                print(i)
-                #whichBlock has to start at 0!
+                #i is the index of the byte we're looking for within the given block
                 thisByte = getByteOfPlaintext(blockSize, i, result, whichBlock)
                 result += thisByte
-                print(result)
             whichBlock += 1
-    except Exception:
+    except TypeError:
         #we just reached the end of the string we're finding
         pass
-    return result
+    return stripPKCS7(result, blockSize)
