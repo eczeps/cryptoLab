@@ -1,7 +1,9 @@
-#2.5
+#6.5
 
 #https://blog.cloudflare.com/padding-oracles-and-the-decline-of-cbc-mode-ciphersuites/
 #https://en.wikipedia.org/wiki/Padding_oracle_attack
+#https://www.youtube.com/watch?v=pEdGUSGi1iM
+#https://blog.skullsecurity.org/2013/padding-oracle-attacks-in-depth
 
 from challenge11 import random16Bytes, next16Multiple
 from random import *
@@ -45,15 +47,67 @@ def decryptAndCheck(ciphertext):
 
 def checkPKCS7pad(byteString, blockSize):
     lastByte = byteString[-1]
-    #assumes block size of 16
+    #assumes block size of 16 AND that there is at least some padding
     if lastByte in bytes(range(blockSize)):
         for i in range(1, lastByte + 1):
             if byteString[-i] != lastByte:
                 #invalid PKCS7 padding
                 return False
-    return True
+        return True
+    return False
     
     
+def paddingOracleAttack(blockSize=16):
+    ciphertext = encryptAString()
+    #cprime tbh should be a random bytestring
+    cprime = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    blocks = getListOfBlocks(ciphertext)
+    potentialBytes = bytes(range(256))
+    #we just needed a list of len blocksize
+    plaintexts = [[None]*blockSize for x in range(len(blocks))]
+    for index in range(len(blocks))[::-1]:
+        #currentBlock is the one we're currently trying to break
+        #it corresponds to CsubN in the articles I was reading
+        currentBlock = blocks[index]
+        for k in range(blockSize)[::-1]:
+            print("k at beginning", k)
+            
+            '''setting up testcprime'''
+            
+            encryptedpad = b"\x10"
+            if k != len(cprime) - 1 and k != 0:
+                #this really should be plaintext[k] but you're building plaintext in a bad way
+                #so this is messed up too
+                temp = bytesXOR(plaintexts[index][k + 1], bytes([blocks[index -1][k + 1]]))
+                encryptedpad = bytesXOR(bytes([blockSize - k]), temp)
+                print("got encryptedpad")
+            for byte in potentialBytes:
+                testcprime = b""
+                #set cprime[k] = potentialByte:
+                for j in range(len(cprime)):
+                    if k == j:
+                        testcprime += bytes([byte])
+                    elif j > k:
+                        testcprime += encryptedpad
+                    else:
+                        testcprime += bytes([cprime[j]])
+                        
+                print("testcprime", testcprime)        
+                exploitString = testcprime + currentBlock
+                pprime = decryptAndCheck(exploitString)
+                if pprime == True:
+                    temp = bytesXOR(bytes([blocks[index - 1][k]]), bytes([testcprime[k]]))
+                    print("K", k)
+                    print("index", index)
+                    print("plaintexts", plaintexts)
+                    plaintexts[index][k] = bytesXOR(bytes([blockSize - k]), temp)
+                    print("xor constant", blockSize - k)
+                    print("plaintexts so far", plaintexts)
+                    break
+    return plaintexts
+        
+        
+"""
 def paddingOracleAttack(blockSize=16):
     ciphertext = encryptAString()
     listOfBlocks = getListOfBlocks(ciphertext)
@@ -69,7 +123,7 @@ def paddingOracleAttack(blockSize=16):
 def breakOneBlock(c1, blockSize=16):
     #c2 is a block of ciphertext PRECEEDING the block we're breaking
     #p2 just has to be a list of length blockSize
-    p2 = [x for x in range(blockSize)]
+    p2 = [bytes([x]) for x in range(blockSize)]
     #blockBytes should be like [15, 14, 13...0]
     blockBytes = range(blockSize)[::-1]
     potentialBytes = bytes(range(256))
@@ -101,9 +155,10 @@ def breakOneBlock(c1, blockSize=16):
                 print("byte", byte)
                 print("c1", c1)
                 print("testC",testC)
-                print()
                 xord = bytesXOR(testC, padding)
-                p2[byte] = xord
+                print("xord", xord)
+                print()
+                p2[byte] = bytes([xord[0]])
                 #break out of inner for loop
                 break
     return b''.join(p2)
@@ -129,3 +184,4 @@ def flipOneBit(ciphertext, whichBit):
                     '''xor the bit'''
                     pass
     return None
+    """
