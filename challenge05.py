@@ -1,8 +1,7 @@
 #3.5 hrs
+#this took an extra like 2 hours because i wasn't including the newline in the plaintext
 
-
-def main(plaintext, key):
-    #key is a string, plaintext is bytes
+def main(plaintext="Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal", key="ICE"):
     encryption = encrypt(plaintext.encode(), key)
     return bytes.hex(encryption)
 

@@ -1,6 +1,7 @@
 #3.5 hrs; most of it spent fixing challenge06
 
-def main(filename):
+def main(filename="8.txt"):
+    print("finding ciphertext in file " + filename)
     listOfCiphertexts = parseFile(filename)
     likelyEncrypted = findLikelyEncrypted(listOfCiphertexts)
     return likelyEncrypted

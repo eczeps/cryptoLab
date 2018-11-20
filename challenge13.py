@@ -2,6 +2,7 @@
 
 
 '''TO RUN THIS FILE:
+either just run main, or:
 as the attacker, run attack()
 as a good person making an account, run profile_for() for unencrypted, or 
 getEncryptedProfile() for encrypted
@@ -17,13 +18,20 @@ from challenge15 import stripPKCS7
 KEY = random16Bytes()
 
 
+def main(email=b"hello@abc.com"):
+    print("creating an account as a non-adversary for email " + email.decode())
+    goodProf = profile_for(email)
+    print(goodProf)
+    print("attacking!")
+    return attack()
+    
+
+
 def attack(BLOCKSIZE=16):
     evil1 = getEncryptedProfile(b"admin")
     evil2 = getEncryptedProfile(b"normalEmail@everythingisok.com")
     decryptedEvil1 = stripPKCS7(decryptUserProfile(evil1), BLOCKSIZE)
     decryptedEvil2 = stripPKCS7(decryptUserProfile(evil2), BLOCKSIZE)
-    print(decryptedEvil1)
-    print(decryptedEvil2)
     sploit = decryptedEvil2[:-5] + decryptedEvil1[5:11]
     return sploit
     

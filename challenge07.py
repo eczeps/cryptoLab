@@ -1,13 +1,13 @@
-#2 hr
+#2 hrs
 
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 import base64
 
-def main(filename, key):
+def main(filename="7.txt", key=b"YELLOW SUBMARINE"):
+    print("decrypting file " + filename + " under the key " + key.decode())
     ciphertext = parseFile(filename)
-    print(ciphertext[:40])
     plaintext = AESdecrypt(ciphertext, key)
     return plaintext
     

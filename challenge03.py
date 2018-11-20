@@ -3,8 +3,9 @@
 
 
 
-def main(ciphertext):
-    return decryptSingleCharKey(ciphertext)
+def main(ciphertext="1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"):
+    print("decrypting ciphertext " + ciphertext)
+    return decryptSingleCharKey(ciphertext)[0]
 
 def decryptSingleCharKey(ciphertext):
     allPlaintexts = getAllPlaintexts(ciphertext)
@@ -18,8 +19,6 @@ def getAllPlaintexts(ciphertext):
     #just generating a list of all the possible bytes:
     digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
     keyBytes = [a + b for a in digits for b in digits]
-    #keyBytes = ['61']
-    #keyBytes = [x for x in range(0xFF+1)]
     #how many times you have to repeat each key char to make it the length of ciphertext
     length = int(len(ciphertext)/2)
     allKeys = [(byte*length).encode() for byte in keyBytes]
@@ -40,13 +39,6 @@ def fixed_XOR(hexstr1, hexstr2):
     
 #given a list of plaintexts in bytes, return the most likely one still in bytes
 def pickPlaintext(allPlaintexts):
-    '''
-    listOfFrequencyDicts = [getFrequencyDict(plaintext) for plaintext in allPlaintexts]
-    listOfScores = [scoreFrequencyDict(freqDict) for freqDict in listOfFrequencyDicts]
-    zipped = list(zip(listOfScores, allPlaintexts))
-    filtered = [entry for entry in zipped if entry[0] > 0]
-    pprint.pprint(filtered)
-    '''
     listOfScores = [scorePlaintext(plaintext[0]) for plaintext in allPlaintexts]
     zipped = list(zip(listOfScores, allPlaintexts[0]))
     filtered = [entry for entry in zipped if entry[0] > 50]
@@ -57,7 +49,6 @@ def pickPlaintext(allPlaintexts):
 
     
 #returns frequency dict of each byte in plaintext, converted to decimal
-#tbh not sure where the conversion happens, but key values end up in decimal
 def getFrequencyDict(plaintext):
     result = {}
     #this makes a list of bytes in DECIMAL

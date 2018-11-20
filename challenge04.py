@@ -1,18 +1,13 @@
-#6 hrs (mostly refining challenge 3)
-#NOTE: MAKE SURE THAT YOU'VE SYNCED DIRECTORY TO THE EDITOR (BOTTOM RIGHT IN CANOPY)
+#6 hrs, mostly refining challenge 3 scoring function and remembering the key that worked
 
 from challenge03 import *
-import pprint
 
-def main(filename):
+def main(filename="4.txt"):
+    print("decrypting ciphertext in file " + filename)
     listOfCiphertexts = parseFile(filename)
-    #check that you're parsing the file right
-    pprint.pprint(listOfCiphertexts)
-    #check the type of a ciphertext against what decrypt is expecting
     listOfPlaintexts = [decryptSingleCharKey(ciphertext) for ciphertext in listOfCiphertexts]
-    #print(listOfPlaintexts)
     bestGuess = pickPlaintext(listOfPlaintexts)
-    return bestGuess[0]
+    return bestGuess[0][0]
     
 #given a filename, parses and on each newline adds the string to a list
 def parseFile(filename):

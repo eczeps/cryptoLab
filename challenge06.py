@@ -3,7 +3,8 @@ from challenge03 import decryptSingleCharKey
 import base64
 
 
-def main(filename):
+def main(filename="6.txt"):
+    print("decrypting file " + filename)
     ciphertext = parseFile(filename)
     #ciphertext should be a bytes string
     ciphertext = base64StringToBytes(ciphertext)
@@ -13,7 +14,6 @@ def main(filename):
 def decryptRepeatingKey(ciphertext):
     #ciphertext should be bytes string
     keySize = findKeySize(ciphertext)
-    print(keySize)
     listOfBlocks = getListOfBlocks(ciphertext, keySize)
     transposedBlocks = getTransposedBlocks(listOfBlocks)
     key = getKey(transposedBlocks, keySize)
@@ -89,33 +89,7 @@ def hammingDistance(bytes1, bytes2):
         ham += (len(bytes1) - len(bytes2))*8
     return ham
     
-'''
-this works, but takes in strings and I wanted it to take in bytes
-def hammingDistance(string1, string2):
-    #  assumes string1 >= string2
-    ham = 0
-    #bytes1 = binascii.a2b_qp(string1)
-    #bytes2 = binascii.a2b_qp(string2)
-    bytes1 = string1.encode()
-    bytes2 = string2.encode()
-    for i in range(len(bytes2)):
-        bin1 = bin(bytes1[i])
-        bin2 = bin(bytes2[i])
-        #bin1 and bin2 include an 0b at the beginning -- get rid of it:
-        bin1 = bin1[2:]
-        bin2 = bin2[2:]
-        #bin1 and bin2 will drop any leading 0s, which we need to fix
-        bin1 = (8 - len(bin1))*'0' + bin1
-        bin2 = (8 - len(bin2))*'0' + bin2
-        #now loop through each bit in bins
-        for j in range(len(bin2)):
-            if bin1[j] != bin2[j]:
-                ham += 1
-    if len(string1) > len(string2):
-        #8 bits per byte, char is 2 bytes, so we multiply by 4
-        ham += (len(string1) - len(string2))*4
-    return ham
-    '''
+
 def findKeySize(bytesString):
     bestKEYSIZE = 0
     shortestDistance = len(bytesString)
@@ -161,7 +135,6 @@ def findKeySize(bytesString):
                     second = bytesString[KEYSIZE:]
                     distance = hammingDistance(first, second)
                     normalizedDistance = distance/KEYSIZE
-        print(normalizedDistance)
         if normalizedDistance < shortestDistance:
             shortestDistance = normalizedDistance
             bestKEYSIZE = KEYSIZE

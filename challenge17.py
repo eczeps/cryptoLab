@@ -1,15 +1,31 @@
 #6.5
 
+'''these were super helpful resources I used to help understand padding oracle 
+attacks. some of them include code, I just didn't watch/read those parts'''
 #https://blog.cloudflare.com/padding-oracles-and-the-decline-of-cbc-mode-ciphersuites/
 #https://en.wikipedia.org/wiki/Padding_oracle_attack
 #https://www.youtube.com/watch?v=pEdGUSGi1iM
 #https://blog.skullsecurity.org/2013/padding-oracle-attacks-in-depth
+
+
+'''NOTE:
+this exploit is not finished! When you run it you should get a type error that
+zip argument #1 must support iteration. This just means it didn't find any 
+correct padding for one of the bytes, and it fails on the next iteration because
+the previous byte is None.  I think there's an off by one error here -- I read
+the articles above and really feel like I understand the theory/concepts, just 
+couldn't get the code to actually work'''
 
 from challenge11 import random16Bytes, next16Multiple
 from random import *
 from challenge10 import CBCencrypt, CBCdecrypt, getListOfBlocks
 from challenge09 import PKCS7pad
 from challenge06 import bytesXOR
+
+
+
+
+'''REMEMBER TO MAKE IT RANDOM AGAIN AT THE END'''
 
 #KEY = random16Bytes()
 KEY = b'\xba3"\x84mS\xc4\xa5\x8c\x9e\xf9 \xffDrQ'
@@ -18,7 +34,18 @@ IV = b'^\xc5Q\xe5D\xb0w\x98\xdf\x16.\x0f.\\H\xb0'
 
 
 
-'''REMEMBER TO MAKE IT RANDOM AGAIN AT THE END'''
+
+
+def main():
+    try:
+        paddingOracleAttack()
+    except TypeError:
+        print()
+        print()
+        print("we got a type error! it's okay. just means we didn't find any\
+        correct padding for our previous block. this challenge doesn't completely\
+        work")
+
 
 
 def encryptAString():
@@ -33,6 +60,7 @@ b"MDAwMDA3SSdtIG9uIGEgcm9sbCwgaXQncyB0aW1lIHRvIGdvIHNvbG8=",
 b"MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=",
 b"MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93"]
     #index = randrange(0, len(possibilities))
+    #MAKE IT RANDOM HERE TOO
     index = 2
     mult = next16Multiple(len(possibilities[index]))
     padded = PKCS7pad(possibilities[index], mult)
@@ -58,12 +86,12 @@ def checkPKCS7pad(byteString, blockSize):
     
     
 def paddingOracleAttack(blockSize=16):
+    #all the naming conventions here are from the skullsecurity blog post
     ciphertext = encryptAString()
-    #cprime tbh should be a random bytestring
     cprime = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
     blocks = getListOfBlocks(ciphertext)
     potentialBytes = bytes(range(256))
-    #we just needed a list of len blocksize
+    #plaintexts just needs to be a list of lists of length blockSize
     plaintexts = [[None]*blockSize for x in range(len(blocks))]
     for index in range(len(blocks))[::-1]:
         #currentBlock is the one we're currently trying to break
@@ -76,8 +104,6 @@ def paddingOracleAttack(blockSize=16):
             
             encryptedpad = b"\x10"
             if k != len(cprime) - 1 and k != 0:
-                #this really should be plaintext[k] but you're building plaintext in a bad way
-                #so this is messed up too
                 temp = bytesXOR(plaintexts[index][k + 1], bytes([blocks[index -1][k + 1]]))
                 encryptedpad = bytesXOR(bytes([blockSize - k]), temp)
                 print("got encryptedpad")
@@ -92,10 +118,13 @@ def paddingOracleAttack(blockSize=16):
                     else:
                         testcprime += bytes([cprime[j]])
                         
+                        
+                        
                 print("testcprime", testcprime)        
                 exploitString = testcprime + currentBlock
                 pprime = decryptAndCheck(exploitString)
                 if pprime == True:
+                    print("found correct padding!")
                     temp = bytesXOR(bytes([blocks[index - 1][k]]), bytes([testcprime[k]]))
                     print("K", k)
                     print("index", index)
@@ -164,24 +193,4 @@ def breakOneBlock(c1, blockSize=16):
     return b''.join(p2)
             
             
-    
-    
-def flipOneBit(ciphertext, whichBit):
-    '''flips whichBit in ciphertext's second to last block, so the plaintext
-    of the second to last block will be totally messed up and one bit will have
-    changed in the last plaintext (changing the padding). assumes len(ciphertext)
-    is a multiple of the block size'''
-    blocks = getListOfBlocks(ciphertext)
-    newCiphertext = b""   
-    for index in range(len(blocks)):
-        if index != len(blocks) - 2:
-            newCiphertext += bytes([blocks[index]])
-        else:
-            for bit in range(len(blocks[index])*8):
-                if bit != whichBit:
-                    newCiphertext += 100000000000000000000
-                else:
-                    '''xor the bit'''
-                    pass
-    return None
     """

@@ -8,6 +8,10 @@ from challenge15 import stripPKCS7
 KEY = random16Bytes()
 IV = random16Bytes()
 
+def main():
+    print("breaking the cipher and checking for ;admin=true;")
+    return breakCipher()
+
 
 def concatAndEncrypt(plaintext):
     prepend = b"comment1=cooking%20MCs;userdata="
@@ -16,7 +20,6 @@ def concatAndEncrypt(plaintext):
     longPlaintext = prepend + plaintext + append
     nextMult = next16Multiple(len(longPlaintext))
     fullPlaintext = PKCS7pad(longPlaintext, nextMult)
-    print(fullPlaintext)
     ciphertext = CBCencrypt(fullPlaintext, KEY, IV)
     return ciphertext
     

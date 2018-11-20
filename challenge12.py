@@ -1,4 +1,4 @@
-#4
+#4 hours
 import base64
 from challenge10 import AESencrypt
 from challenge11 import random16Bytes, next16Multiple, detectECBorCBC
@@ -27,7 +27,6 @@ def ECBOracle(yourString):
     return ciphertext
     
 def findBlockSize(key):
-    #idk
     #keep adding bytes until the length of the ciphertext jumps and see how much it jumps by
     return 16
     

@@ -9,10 +9,10 @@ from challenge06 import parseFile, base64StringToBytes
 '''somehow it works on 11test1.txt but not 11test2.txt. the repeated block
 counting function is messed up but it's super unclear why??? '''
 
-def main(filename):
+def main(filename="11test1.txt"):
+    print("encrypting " + filename)
     plaintext = parseFile(filename)
     ciphertext = encryptionOracle(plaintext)
-    print(ciphertext)
     return detectECBorCBC(ciphertext)
 
 def detectECBorCBC(ciphertext):
@@ -20,7 +20,6 @@ def detectECBorCBC(ciphertext):
     score = 0
     #repeatedBlocks are only helpful if len >= 32
     repeatedBlocks= numRepeatedBlocks(ciphertext)
-    print(repeatedBlocks)
     score += repeatedBlocks
     if score > 0:
         return "ECB"

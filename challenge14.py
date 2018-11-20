@@ -1,13 +1,14 @@
-#2
+#2.5
 
 #random count of bytes added to plaintext should be larger than the blocksize and
 #also should be constant! as in the bytes are random but the count is constant
 
 '''
-my strategy is to do the same thing as in 12 for all the blocks that are just 
-the unknown string, adn for the block that's partly random bytes, just only
-iterate through the bytes in that block that aren't random. is that the right
-strategy
+NOTE:
+this isn't done. The problem is in getByteOfPlaintext14 -- it returns None when
+it shouldn't be, but also sometimes it just returns an empty string, and sometimes
+it works. What it does depends on RANDOMCOUNT.
+    
 '''
 
 from random import *
@@ -19,9 +20,18 @@ from challenge15 import stripPKCS7
 from challenge11 import random16Bytes, next16Multiple, detectECBorCBC
 
 
-#RANDOMCOUNT = randrange(17, 256)
-RANDOMCOUNT = 32
+RANDOMCOUNT = randrange(17, 256)
 KEY = random16Bytes()
+
+
+
+def main():
+    try:
+        breakECBOracle14(16)
+    except Exception:
+        print("caught exception!")
+
+
 
 def ECBOracle14(yourString):
     #yourString should be a BYTEstring
@@ -71,7 +81,6 @@ def breakECBOracle14(blockSize):
     #the attacker-controlled string
     whichBlock = math.floor(RANDOMCOUNT/blockSize) - 1 
     if RANDOMCOUNT%blockSize != 0:
-        print("hello")
         for byte in range(RANDOMCOUNT%blockSize + 1, blockSize)[::-1]:
             #the first time, because of the random bytes the thing could start in the middle
             #of a block
@@ -80,8 +89,6 @@ def breakECBOracle14(blockSize):
         whichBlock += 1
     try:
         while True:
-            print(whichBlock)
-            print(result)
             #this is a little bit yikes but it's just going to keep looping until
             #we get to the end of the string we're figuring out
             #hard to make a condition because we don't know how long that string is

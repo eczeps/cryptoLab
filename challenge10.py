@@ -4,7 +4,9 @@ from cryptography.hazmat.backends import default_backend
 from challenge06 import bytesXOR, parseFile, base64StringToBytes
 from challenge09 import PKCS7pad
 
-def main(filename):
+def main(filename="10.txt"):
+    print("decrypting and then encrypting " + filename)
+    print("checking if decrypt and encrypt were inverses ")
     ciphertext = parseFile(filename)
     ciphertext = base64StringToBytes(ciphertext)
     decrypted = CBCdecrypt(ciphertext, b"YELLOW SUBMARINE", b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
